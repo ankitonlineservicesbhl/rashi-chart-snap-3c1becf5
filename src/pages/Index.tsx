@@ -2,7 +2,10 @@ import React, { useState, useCallback, useEffect } from 'react';
 import BirthInfoForm from '@/components/BirthInfoForm';
 import RashiChart from '@/components/RashiChart';
 import PlanetInfoTable from '@/components/PlanetInfoTable';
+import PredictionsTab from '@/components/PredictionsTab';
 import { calculateChart, parseLatitude, parseLongitude, BirthData, Planet, isKundliLoaded } from '@/lib/kundliCalculations';
+import { generatePredictions, Prediction } from '@/lib/predictions';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
   // Form state
@@ -17,6 +20,7 @@ const Index = () => {
   const [planets, setPlanets] = useState<Planet[]>([]);
   const [rashis, setRashis] = useState<number[]>([]);
   const [houses, setHouses] = useState<string[][]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [chartGenerated, setChartGenerated] = useState(false);
   const [kundliReady, setKundliReady] = useState(false);
 
@@ -54,6 +58,11 @@ const Index = () => {
     setPlanets(result.planets);
     setRashis(result.rashis);
     setHouses(result.houses);
+    
+    // Generate predictions
+    const preds = generatePredictions(result.planets, result.houses, result.rashis);
+    setPredictions(preds);
+    
     setChartGenerated(true);
   }, [name, date, time, tz, lat, lon, kundliReady]);
 
@@ -85,19 +94,30 @@ const Index = () => {
         />
 
         {chartGenerated && (
-          <>
-            <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-foreground">Rashi Chart (D1)</h2>
-              <div className="flex justify-center">
-                <RashiChart rashis={rashis} houses={houses} title="Rashi Chart" />
-              </div>
-            </section>
+          <Tabs defaultValue="chart" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="chart">Chart & Planets</TabsTrigger>
+              <TabsTrigger value="predictions">Predictions</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="chart" className="space-y-6 mt-4">
+              <section className="space-y-2">
+                <h2 className="text-lg font-semibold text-foreground">Rashi Chart (D1)</h2>
+                <div className="flex justify-center">
+                  <RashiChart rashis={rashis} houses={houses} title="Rashi Chart" />
+                </div>
+              </section>
 
-            <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-foreground">Planet Information</h2>
-              <PlanetInfoTable planets={planets} />
-            </section>
-          </>
+              <section className="space-y-2">
+                <h2 className="text-lg font-semibold text-foreground">Planet Information</h2>
+                <PlanetInfoTable planets={planets} />
+              </section>
+            </TabsContent>
+            
+            <TabsContent value="predictions" className="mt-4">
+              <PredictionsTab predictions={predictions} />
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>
