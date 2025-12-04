@@ -9,6 +9,8 @@ interface RashiChartProps {
 const RashiChart: React.FC<RashiChartProps> = ({ rashis, houses, title = "Rashi Chart" }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const scale = 2; // ⭐ Change chart size here (1 = normal, 2 = 2x, 3 = 3x)
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -16,8 +18,12 @@ const RashiChart: React.FC<RashiChartProps> = ({ rashis, houses, title = "Rashi 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear canvas
+    // Reset and clear
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ⭐ Apply scale BEFORE drawing
+    ctx.scale(scale, scale);
 
     const x = 0;
     const y = 0;
@@ -61,49 +67,29 @@ const RashiChart: React.FC<RashiChartProps> = ({ rashis, houses, title = "Rashi 
     ctx.lineTo(x + width, y);
     ctx.stroke();
 
-    // Draw zodiac numbers (small, in corners of houses)
+    // Draw zodiac numbers
     ctx.font = '9px Arial';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000000';
 
-    // Position for zodiac numbers (12 houses, clockwise from top center)
     const zodiacPos = [
-      [125, 93],   // House 1 (center top)
-      [62, 43],    // House 2 (top left inner)
-      [50, 54],    // House 3 (left top)
-      [111, 104],  // House 4 (center)
-      [50, 154],   // House 5 (left bottom)
-      [62, 165],   // House 6 (bottom left inner)
-      [125, 117],  // House 7 (center bottom)
-      [188, 165],  // House 8 (bottom right inner)
-      [200, 154],  // House 9 (right bottom)
-      [139, 104],  // House 10 (center right)
-      [200, 54],   // House 11 (right top)
-      [188, 43]    // House 12 (top right inner)
+      [125, 93], [62, 43], [50, 54], [111, 104],
+      [50, 154], [62, 165], [125, 117], [188, 165],
+      [200, 154], [139, 104], [200, 54], [188, 43]
     ];
 
-    // Draw zodiac signs
     rashis.forEach((rashi, i) => {
       ctx.fillText(String(rashi), zodiacPos[i][0], zodiacPos[i][1]);
     });
 
     // Draw planets in houses
-    ctx.font = '10px Arial';
+    ctx.font = '8px Arial';
     ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
 
     const housePos = [
-      [125, 53],   // House 1
-      [62, 13],    // House 2
-      [26, 54],    // House 3
-      [62, 104],   // House 4
-      [26, 154],   // House 5
-      [62, 195],   // House 6
-      [125, 154],  // House 7
-      [188, 195],  // House 8
-      [224, 154],  // House 9
-      [189, 104],  // House 10
-      [224, 54],   // House 11
-      [188, 13]    // House 12
+      [125, 53], [62, 13], [26, 54], [62, 104],
+      [26, 154], [62, 195], [125, 154], [188, 195],
+      [224, 154], [189, 104], [224, 54], [188, 13]
     ];
 
     houses.forEach((planets, i) => {
@@ -118,14 +104,15 @@ const RashiChart: React.FC<RashiChartProps> = ({ rashis, houses, title = "Rashi 
     ctx.textAlign = 'left';
     ctx.fillText(title, 2, height + 15);
 
-  }, [rashis, houses, title]);
+  }, [rashis, houses, title, scale]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={250}
-      height={220}
+      width={250 * scale}
+      height={220 * scale}
       className="border border-border"
+	  style={{ maxWidth: "90%", height: "auto" }}   // 👈 ADD THIS
     />
   );
 };
