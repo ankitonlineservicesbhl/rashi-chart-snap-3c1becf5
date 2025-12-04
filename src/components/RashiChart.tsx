@@ -84,7 +84,7 @@ const RashiChart: React.FC<RashiChartProps> = ({ rashis, houses, title = "Rashi 
 
     // Draw planets in houses
     ctx.font = '8px Arial';
-    ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
+    ctx.fillStyle = '#000000';
 
     const housePos = [
       [125, 53], [62, 13], [26, 54], [62, 104],
